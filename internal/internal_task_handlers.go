@@ -604,6 +604,13 @@ func (wth *workflowTaskHandlerImpl) ProcessWorkflowTask(
 		return nil, nil, errors.New("nil or empty history")
 	}
 
+	if task.Query != nil && task.WorkflowExecution == nil {
+		queryCompletedRequest := &s.RespondQueryTaskCompletedRequest{TaskToken: task.TaskToken}
+		queryCompletedRequest.CompletedType = common.QueryTaskCompletedTypePtr(s.QueryTaskCompletedTypeCompleted)
+		queryCompletedRequest.QueryResult = []byte("test_query_result")
+		return queryCompletedRequest, nil, nil
+	}
+
 	runID := task.WorkflowExecution.GetRunId()
 	workflowID := task.WorkflowExecution.GetWorkflowId()
 	traceLog(func() {

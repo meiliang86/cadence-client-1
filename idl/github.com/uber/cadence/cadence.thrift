@@ -22,6 +22,16 @@ include "shared.thrift"
 
 namespace java com.uber.cadence
 
+struct RegisterTaskHandlerDefinitionsRequest {
+  10: optional string domainUUID
+  20: optional shared.TaskList taskList
+  30: optional shared.TaskHandlerType taskHandlerType
+}
+
+struct RegisterTaskHandlerDefinitionsResponse {
+  10: optional list<shared.TaskHandlerDefinition> taskHandlerDefinitions
+}
+
 /**
 * WorkflowService API is exposed to provide support for long running applications.  Application is expected to call
 * StartWorkflowExecution to create an instance for each instance of long running workflow.  Such applications are expected
@@ -424,6 +434,18 @@ service WorkflowService {
 	)
 
   /**
+  * QueryTaskList returns query result for a specified task list
+  **/
+  shared.QueryTaskListResponse QueryTaskList(1: shared.QueryTaskListRequest queryRequest)
+	throws (
+	  1: shared.BadRequestError badRequestError,
+	  2: shared.InternalServiceError internalServiceError,
+	  3: shared.EntityNotExistsError entityNotExistError,
+	  4: shared.QueryFailedError queryFailedError,
+	  5: shared.LimitExceededError limitExceededError,
+	)
+
+  /**
   * DescribeWorkflowExecution returns information about the specified workflow execution.
   **/
   shared.DescribeWorkflowExecutionResponse DescribeWorkflowExecution(1: shared.DescribeWorkflowExecutionRequest describeRequest)
@@ -446,4 +468,5 @@ service WorkflowService {
       4: shared.LimitExceededError limitExceededError,
     )
 
+//  RegisterTaskHandlerDefinitionsResponse RegisterTaskHandlerDefinitions(1: RegisterTaskHandlerDefinitionsRequest request)
 }

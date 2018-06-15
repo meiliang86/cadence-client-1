@@ -634,6 +634,7 @@ func (wtp *workflowTaskPoller) poll() (*workflowTask, error) {
 		}
 		return nil, err
 	}
+	wtp.logger.Info("pool for decision task returns", zap.Any("response", response))
 
 	if response == nil || len(response.TaskToken) == 0 {
 		wtp.metricsScope.Counter(metrics.DecisionPollNoTaskCounter).Inc(1)

@@ -69,6 +69,10 @@ exception AccessDeniedError {
   1: required string message
 }
 
+exception RetryTaskError {
+  1: required string message
+}
+
 enum WorkflowIdReusePolicy {
   /*
    * allow start a workflow execution using the same workflow ID,
@@ -1067,6 +1071,16 @@ struct WorkflowQuery {
   20: optional binary queryArgs
 }
 
+struct QueryTaskListRequest {
+  10: optional string domain
+  20: optional string taskListName
+  30: optional WorkflowQuery query
+}
+
+struct QueryTaskListResponse {
+  10: optional binary queryResult
+}
+
 struct ResetStickyTaskListRequest {
   10: optional string domain
   20: optional WorkflowExecution execution
@@ -1113,6 +1127,26 @@ struct DescribeTaskListResponse {
   10: optional list<PollerInfo> pollers
 }
 
+//At least one of the parameters needs to be provided
+struct DescribeHistoryHostRequest {
+  10: optional string               hostAddress //ip:port
+  20: optional i32                  shardIdForHost
+  30: optional WorkflowExecution    executionForHost
+}
+
+struct DescribeHistoryHostResponse{
+  10: optional i32                  numberOfShards
+  20: optional list<i32>            shardIDs
+  30: optional DomainCacheInfo      domainCache
+  40: optional string               shardControllerStatus
+  50: optional string               address
+}
+
+struct DomainCacheInfo{
+  10: optional i64 numOfItemsInCacheByID
+  20: optional i64 numOfItemsInCacheByName
+}
+
 enum TaskListType {
   /*
    * Decision type of tasklist
@@ -1149,4 +1183,75 @@ struct RetryPolicy {
 
   // Non-Retriable errors. Will stop retrying if error matches this list.
   50: optional list<string> nonRetriableErrorReasons
+}
+
+enum TaskHandlerType {
+  Workflow,
+  Activity,
+  DSLInterpreter,
+}
+
+enum ParamType {
+  Integer,
+  String,
+  Duration,
+  Binary,
+  Task,
+  Resource,
+  ResourceSet,
+}
+
+struct ParamValue {
+  10: optional binary value
+  20: optional binary defaultValue
+  30: optional bool allowOverride
+}
+
+struct IntValue {
+  10: optional i32 value
+  20: optional i32 defaultValue
+  30: optional bool allowOverride
+}
+
+struct StringValue {
+  10: optional string value
+  20: optional string defaultValue
+  30: optional bool allowOverride
+}
+
+struct ReusePolicyValue {
+  10: optional WorkflowIdReusePolicy value
+  20: optional WorkflowIdReusePolicy defaultValue
+  30: optional bool allowOverride
+}
+
+struct Param {
+  10: optional string name
+  20: optional ParamType type
+  30: optional i32 position
+  40: optional ParamValue value
+}
+
+struct SystemParams {
+  10: optional StringValue taskList,
+  20: optional StringValue domainId,
+  30: optional StringValue workflowId,
+  40: optional StringValue workflowType,
+  50: optional IntValue executionTimeoutSecs,
+  60: optional IntValue decisionTimeoutSecs,
+  70: optional ReusePolicyValue workflowIdReusePolicy,
+}
+
+struct TaskHandlerDefinition {
+  10: optional TaskHandlerType type
+  20: optional string name
+  30: optional string version
+  40: optional string id
+  50: optional string baseTask
+  60: optional list<Param> inputs
+  70: optional list<Param> outputs
+  80: optional SystemParams systemParams
+  90: optional i64 (js.type = "Long") createdTime
+  100: optional string createdBy
+  110: optional string owner
 }
